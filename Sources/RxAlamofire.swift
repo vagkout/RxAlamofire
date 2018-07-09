@@ -16,6 +16,16 @@ import Foundation
 import Alamofire
 import RxSwift
 
+public struct RxAlamofireError: Error {
+    let error: Error
+    let response: DataResponse<Any>?
+    
+    init(error: Error, response: DataResponse<Any>? = nil) {
+        self.error = error
+        self.response = response
+    }
+}
+
 /// Default instance of unknown error
 public let RxAlamofireUnknownError = NSError(domain: "RxAlamofireDomain", code: -1, userInfo: nil)
 
@@ -833,7 +843,7 @@ extension Reactive where Base: DataRequest {
                         observer.on(.error(RxAlamofireUnknownError))
                     }
                 case .failure(let error):
-                    observer.on(.error(error as Error))
+                    observer.on(.error(RxAlamofireError(error: error, response: packedResponse as? DataResponse<Any>)))
                 }
             }
             return Disposables.create {
@@ -886,7 +896,7 @@ extension Reactive where Base: DataRequest {
                             observer.on(.error(RxAlamofireUnknownError))
                         }
                     case .failure(let error):
-                        observer.on(.error(error as Error))
+                        observer.on(.error(RxAlamofireError(error: error, response: packedResponse as? DataResponse<Any>)))
                     }
                 }
             return Disposables.create {
